@@ -1,68 +1,48 @@
-# FablessBioStudio Interface
+# Fabless-Bio Studio Interface
 
-A web-based design tool for scaffold-free biofabrication following the FablessBio model. This interface allows tissue engineers to design constructs by defining anchor positioning strategies, separating design intent from platform-specific fabrication details.
+An interactive demonstration of the Fabless-Bio platform architecture for tissue engineering. This browser-based mockup visualizes how the **Detailed Development Strategies Phase** could function, specifically demonstrating tissue design.
 
 ## What This Is
 
-This is not a Python package with dependencies to install. It's a browser-based interface that runs entirely client-side - open the HTML file and start designing.
+This is a **conceptual demonstration**, not production software. It illustrates how fabless-bio designers could specify tissue geometry, generating foundry-agnostic design files that specialized tissue foundries translate into manufacturing instructions. No installation required - it's a client-side HTML interface that runs directly in your browser. Open the file and explore the concept.
 
-The software translates biological design intent into anchor positioning strategies. Instead of designing scaffolds or printing patterns, you design geometric constraints that guide cell-driven tissue formation. The fabrication platform handles the rest.
+## The Fabless-Bio Vision
 
-## What It Does
+The Fabless-Bio model adapts semiconductor industry architecture to tissue engineering, separating design from manufacturing through five phases:
 
-### Design Tools:
-- Position individual anchors or create arrays with precise spacing control
-- Define linear patterns, grids, circles, and spirals
-- Layer multiple anchor arrays at different Z-heights
-- Mirror, rotate, and duplicate patterns
-- Real-time 3D visualization of anchor positions
+1. **Concept and Design** - Cell source selection and bioprocess planning
+2. **Modeling and Simulation** - Virtual prototyping and computational validation  
+3. **Detailed Development Strategies** - Translation into manufacturable specifications
+4. **Verification and Validation** - Design integrity checks and feasibility assessment
+5. **Manufacturing Handoff** - Foundry-agnostic Bio-DL files converted via foundry-specific Bio-PDKs
 
-### Output Generation:
-- Export anchor coordinates as platform-agnostic design files
-- Generate G-code for automated positioning systems
-- Calculate predicted tissue geometry based on anchor configuration
-- Save and load design files for iterative development
-
-### Key Features:
-- No installation required - runs in any modern browser
-- Parametric design with immediate visual feedback
-- Supports complex multi-layer constructs
-- Platform-independent output compatible with any anchor-based biofabrication system
 
 ## Why This Matters
 
-Traditional tissue engineering requires either scaffold design expertise or access to bioprinting equipment. The FablessBio model separates design from manufacturing - you define anchor geometry, a fabrication partner handles production, and cells remodel into functional tissue.
+Traditional tissue engineering conflates design and manufacturing - you can't design a bioprinted tissue without knowing the specific printer, bioink rheology, and nozzle parameters. The Fabless-Bio model separates these concerns:
 
-This interface makes that design process accessible. The same anchor configuration can produce different tissue forms depending on cell type, culture conditions, and the fabrication platform used. This software helps you design the geometry that guides tissue architecture without locking you into specific manufacturing methods.
+**Designers** specify biological requirements and geometric intent through standardized formats (Bio-DL).
 
-## Use Cases
+**Foundries** translate these specifications using their Biofabrication Process Design Kits (Bio-PDK), which define their specific equipment capabilities, material libraries, resolution limits, and validated protocols.
 
-### Research Applications:
-- Designing anchor configurations for new tissue types
-- Testing geometric effects on tissue formation before fabrication
-- Generating coordinate files for custom fabrication platforms
-- Prototyping multi-unit assemblies and modular tissue building blocks
-- Exploring how anchor spacing influences cell sheet mechanics
+This demonstration shows how fabless-bio design could work within that framework.
 
-### Demonstrated Use:
-This software has been used to design constructs across multiple tissue types including aligned muscle fibers, hollow tubular structures, multi-layer pancreatic micro-organs, and patient-specific disease models. The platform-agnostic approach allows the same design workflow across different fabrication systems.
+## Intended Audience
 
-## Technical Context
+This demonstration helps tissue engineers, foundry operators, investors, and regulators visualize how fabless biofabrication could separate design innovation from manufacturing specialization - mirroring how the semiconductor industry scaled through division of labor rather than vertical integration.
 
-This interface implements the design layer for the FablessBio model described in our manuscript. FablessBio treats biofabrication as a two-sided market: tissue engineers define what they want through anchor positioning, while fabrication platforms determine how to produce those anchor arrays. 
+## Current Status
 
-By standardizing on anchor-based design rather than platform-specific parameters, the model enables tissue engineers to focus on biological outcomes while fabrication partners handle manufacturing optimization. This software provides the interface for that design process.
+**This is a conceptual mockup, not validated production software.** It demonstrates interaction patterns and workflow concepts for the proposed Fabless-Bio platform architecture described in the manuscript.
 
 ## Citation
 
-If you use this software in your research, please cite: [manuscript under review]
+If you reference this demonstration or the Fabless-Bio concept in your work, please cite: [Manuscript under review]
 
-## License
+## Related Work
 
-[License]
+The broader Fabless-Bio platform architecture is detailed in our manuscript "Software Platform Architecture for Fabless Biofabrication," which describes the complete five-phase workflow, Bio-DL/Bio-PDK exchange formats, marketplace infrastructure, and regulatory compliance framework.
 
 ## Contact
 
-Developed by Evolved.Bio.
-
-For questions or collaborations, please reach out to Alireza Shahin (alireza@itsevolved.com).
+Developed by Evolved.Bio to demonstrate the Fabless-Bio platform concept. For questions or collaborations: Alireza Shahin (alireza@itsevolved.com)
