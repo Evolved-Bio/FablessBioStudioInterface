@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabless-Bio Studio - Biological Design Automation Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #F5F1E8;
+            --bg-secondary: #FFFFFF;
+            --bg-tertiary: #FAFAF8;
+            --bg-panel: #FFFFFF;
+            --border: #E0D5C7;
+            --border-active: #4ECFB0;
+            --text-primary: #2C2C2C;
+            --text-secondary: #6B6B6B;
+            --accent-blue: #3BB09C;
+            --accent-green: #4ECFB0;
+            --accent-yellow: #D4AF37;
+            --accent-orange: #E09855;
+            --accent-red: #E07070;
+            --accent-purple: #9B7EAE;
+            --status-ok: #4ECFB0;
+            --status-warn: #E09855;
+            --status-error: #E07070;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* Organic background decoration */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            right: -5%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -15%;
+            left: -10%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(78, 207, 176, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Overlay Styles */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(245, 241, 232, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-content {
+            text-align: center;
+            max-width: 700px;
+            padding: 60px 40px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-green);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .welcome-content h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .welcome-content p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .start-button {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 16px 60px;
+            font-size: 18px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(78, 207, 176, 0.3);
+            font-weight: 500;
+        }
+
+        .start-button:hover {
+            background: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(78, 207, 176, 0.4);
+        }
+
+        /* Feedback Form Overlay */
+        .feedback-overlay {
+            display: none;
+        }
+
+        .feedback-overlay.active {
+            display: flex;
+        }
+
+        .feedback-content {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .feedback-content h2 {
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .feedback-content p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            font-family: inherit;
+            font-size: 13px;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #0098ff;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-panel);
+        }
+
+        /* Contribute Bar */
+        .contribute-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9000;
+            transition: all 0.2s;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .contribute-bar:hover {
+            height: 45px;
+            box-shadow: 0 -4px 20px rgba(0, 122, 204, 0.5);
+        }
+
+        .contribute-bar span {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0;
+            height: 35px;
+            font-size: 13px;
+        }
+
+        .menu-item {
+            padding: 0 12px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: background 0.1s;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            height: 40px;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-btn:hover {
+            background: var(--bg-panel);
+            border-color: var(--border-active);
+        }
+
+        .tool-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .tool-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 4px;
+        }
+
+        /* Main Layout - 3 column */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 150px); /* menu + toolbar + status + contribute bar */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Left Sidebar - Project/Library Browser */
+        .sidebar-left {
+            width: 280px;
+            background: #E8DFD0;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+            cursor: pointer;
+            border-right: 1px solid var(--border);
+            transition: all 0.1s;
+        }
+
+        .sidebar-tab:last-child {
+            border-right: none;
+        }
+
+        .sidebar-tab:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .sidebar-tab.active {
+            background: var(--bg-panel);
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        /* Tree view */
+        .tree-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.1s;
+            user-select: none;
+        }
+
+        .tree-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .tree-item.selected {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
+
+        .tree-icon {
+            font-size: 10px;
+            width: 12px;
+        }
+
+        .tree-children {
+            margin-left: 16px;
+        }
+
+        /* Center Canvas Area */
+        .center-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .canvas-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .canvas-tab {
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            border-right: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.1s;
+            white-space: nowrap;
+        }
+
+        .canvas-tab:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .canvas-tab.active {
+            background: var(--bg-panel);
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .tab-close {
+            opacity: 0.6;
+            transition: opacity 0.1s;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+            color: var(--accent-red);
+        }
+
+        .canvas-area {
+            flex: 1;
+            background: var(--bg-panel);
+            overflow: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Tissue visualization */
+        .tissue-viewport {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tissue-layer {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.1s;
+            background: rgba(78, 201, 176, 0.1);
+        }
+
+        .tissue-layer:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 12px rgba(0, 122, 204, 0.3);
+        }
+
+        .layer-label {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 2px;
+            color: var(--accent-green);
+        }
+
+        /* Right Sidebar - Properties */
+        .sidebar-right {
+            width: 320px;
+            background: #E8DFD0;
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-right-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-right-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .property-group {
+            margin-bottom: 16px;
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .property-group-title {
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .property-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 11px;
+        }
+
+        .property-label {
+            color: var(--text-secondary);
+        }
+
+        .property-value {
+            color: var(--text-primary);
+        }
+
+        .property-input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            font-size: 11px;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            gap: 16px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-ok);
+        }
+
+        .status-indicator.warning {
+            background: var(--status-warn);
+        }
+
+        .status-indicator.error {
+            background: var(--status-error);
+        }
+
+        /* Console Panel */
+        .console-panel {
+            height: 250px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .console-tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .console-tab {
+            padding: 6px 16px;
+            font-size: 11px;
+            cursor: pointer;
+            border-right: 1px solid var(--border);
+            transition: all 0.1s;
+        }
+
+        .console-tab:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .console-tab.active {
+            background: var(--bg-panel);
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+
+        .console-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            font-size: 11px;
+            font-family: inherit;
+        }
+
+        .console-line {
+            padding: 2px 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .console-time {
+            color: var(--text-secondary);
+        }
+
+        .console-level {
+            font-weight: bold;
+        }
+
+        .console-level.info {
+            color: var(--accent-blue);
+        }
+
+        .console-level.success {
+            color: var(--status-ok);
+        }
+
+        .console-level.warning {
+            color: var(--status-warn);
+        }
+
+        .console-level.error {
+            color: var(--status-error);
+        }
+
+        .console-message {
+            color: var(--text-primary);
+        }
+
+        /* Modal/Dialog styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            color: var(--accent-blue);
+        }
+
+        .modal-close {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 20px;
+            transition: color 0.1s;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-red);
+        }
+
+        .modal-body {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .btn-success {
+            background: var(--status-ok);
+            color: var(--bg-primary);
+        }
+
+        .btn-success:hover {
+            background: #a0e69c;
+        }
+
+        .btn-danger {
+            background: var(--status-error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff6b6b;
+        }
+
+        /* Constraint Editor Styles */
+        .constraint-item {
+            background: var(--bg-tertiary);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        .constraint-item.warning {
+            border-left-color: var(--status-warn);
+        }
+
+        .constraint-item.error {
+            border-left-color: var(--status-error);
+        }
+
+        /* Scenario Manager Styles */
+        .scenario-card {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .scenario-card:hover {
+            border-color: var(--accent-blue);
+            background: var(--bg-panel);
+        }
+
+        .scenario-card.active {
+            border-color: var(--accent-green);
+            background: rgba(78, 201, 176, 0.1);
+        }
+
+        /* Yield Statistics */
+        .yield-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: var(--bg-panel);
+            margin-bottom: 4px;
+            border-radius: 2px;
+        }
+
+        .yield-stat.good {
+            border-left: 3px solid var(--status-ok);
+        }
+
+        .yield-stat.moderate {
+            border-left: 3px solid var(--status-warn);
+        }
+
+        .yield-stat.poor {
+            border-left: 3px solid var(--status-error);
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Overlay -->
+    <div class="overlay" id="welcome-overlay">
+        <div class="welcome-content">
+            <h1>► Are you ready to contribute to the future of tissue engineering and regenerative medicine?</h1>
+            <p>
+                Fabless-Bio Studio is the world's first Biological Design Automation (BDA) platform.<br>
+                Design, simulate, verify, and manufacture living tissues with semiconductor-grade precision.<br><br>
+                <strong>Join us in building the foundry model for human biology.</strong>
+            </p>
+            <button class="start-button" onclick="hideWelcome()">START ▶</button>
+        </div>
+    </div>
+
+    <!-- Feedback Overlay -->
+    <div class="overlay feedback-overlay" id="feedback-overlay">
+        <div class="feedback-content">
+            <h2>Share Your Feedback</h2>
+            <p>Help us shape the future of biological design automation. Your insights matter.</p>
+            
+            <form id="feedback-form">
+                <div class="form-group">
+                    <label for="feedback-name">Name *</label>
+                    <input type="text" id="feedback-name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedback-email">Email *</label>
+                    <input type="email" id="feedback-email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedback-message">Your Feedback *</label>
+                    <textarea id="feedback-message" name="message" required placeholder="Share your thoughts on the platform, suggest features, report issues, or tell us about your use case..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideFeedback()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Top Menu Bar -->
+    <div class="menu-bar">
+        <div class="menu-item">File</div>
+        <div class="menu-item">Edit</div>
+        <div class="menu-item">Design</div>
+        <div class="menu-item">Simulate</div>
+        <div class="menu-item">Verify</div>
+        <div class="menu-item">Foundry</div>
+        <div class="menu-item">Tools</div>
+        <div class="menu-item">Window</div>
+        <div class="menu-item">Help</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <button class="tool-btn active" onclick="switchMode('specify')">
+            <span>📋</span> Specify
+        </button>
+        <button class="tool-btn" onclick="switchMode('design')">
+            <span>▣</span> Design
+        </button>
+        <button class="tool-btn" onclick="switchMode('simulate')">
+            <span>◐</span> Simulate
+        </button>
+        <button class="tool-btn" onclick="switchMode('verify')">
+            <span>✓</span> Verify
+        </button>
+        <button class="tool-btn" onclick="switchMode('constraints')">
+            <span>◈</span> Constraints
+        </button>
+        <button class="tool-btn" onclick="switchMode('scenarios')">
+            <span>⚡</span> Scenarios
+        </button>
+        <div class="tool-separator"></div>
+        <button class="tool-btn" onclick="openModal('compile')">
+            <span>⚙</span> Compile Bio-DL
+        </button>
+        <button class="tool-btn" onclick="openModal('export')">
+            <span>↗</span> Export to Foundry
+        </button>
+        <div class="tool-separator"></div>
+        <button class="tool-btn" onclick="openModal('yield')">
+            <span>📊</span> Yield Analysis
+        </button>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar -->
+        <div class="sidebar-left">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" onclick="switchSidebarTab('project')">PROJECT</div>
+                <div class="sidebar-tab" onclick="switchSidebarTab('library')">LIBRARY</div>
+                <div class="sidebar-tab" onclick="switchSidebarTab('foundry')">FOUNDRY</div>
+            </div>
+            <div class="sidebar-content">
+                <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px; font-weight: bold;">
+                    📁 fully_formed_pancreas/
+                </div>
+                
+                <!-- Bio-DL Source -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>📄 bio_dl/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item selected">
+                        <span class="tree-icon"></span>
+                        <span>pancreas_architecture.biodl</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>vascular_network.biodl</span>
+                    </div>
+                </div>
+
+                <!-- Constraints -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>📋 constraints/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>biological.bcf</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>manufacturing.bcf</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>cost_targets.bcf</span>
+                    </div>
+                </div>
+                
+                <!-- Cell Sources -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>🧬 cell_sources/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>iPSC_beta_v4.2.cell</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>HUVEC_endothelial.cell</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>MSC_stromal_support.cell</span>
+                    </div>
+                </div>
+                
+                <!-- Tissue Design -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>🔷 tissue_design/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>pancreas_core_structure.tdf</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>vascular_shell.tdf</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>immune_barrier.tdf</span>
+                    </div>
+                </div>
+                
+                <!-- Protocols -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>⚗️ protocols/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>differentiation.proto</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>maturation_28d.proto</span>
+                    </div>
+                </div>
+                
+                <!-- Simulation -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>🔬 simulation/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>diffusion_model.sim</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>mechanical_stress.sim</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>cytokine_field.sim</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>scenario_montecarlo.sim</span>
+                    </div>
+                </div>
+                
+                <!-- Verification -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>✓ verification/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>bio_drc_rules.ver</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>bio_lvs_check.ver</span>
+                    </div>
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>timing_closure.ver</span>
+                    </div>
+                </div>
+
+                <!-- Bio-PDK -->
+                <div class="tree-item">
+                    <span class="tree-icon">▶</span>
+                    <span>📦 bio_pdk/</span>
+                </div>
+                <div class="tree-children">
+                    <div class="tree-item">
+                        <span class="tree-icon"></span>
+                        <span>lonza_28nm_process.pdk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="center-panel">
+            <div class="canvas-tabs">
+                <div class="canvas-tab active">
+                    pancreas_architecture.biodl
+                    <span class="tab-close">×</span>
+                </div>
+                <div class="canvas-tab">
+                    biological.bcf
+                    <span class="tab-close">×</span>
+                </div>
+                <div class="canvas-tab">
+                    scenario_montecarlo.sim
+                    <span class="tab-close">×</span>
+                </div>
+            </div>
+            
+            <div class="canvas-area" id="canvas-area">
+                <!-- Design Mode Content (Default) -->
+                <div id="design-content">
+                    <h3 style="color: var(--accent-green); margin-bottom: 16px;">
+                        TISSUE ARCHITECTURE DESIGNER
+                    </h3>
+                    
+                    <div class="tissue-viewport">
+                        <!-- Simulated tissue layers -->
+                        <div class="tissue-layer" style="left: 150px; top: 100px; width: 300px; height: 300px; border-radius: 150px;">
+                            <div class="layer-label">Core Beta Cell Cluster (β-cells)</div>
+                        </div>
+                        <div class="tissue-layer" style="left: 125px; top: 75px; width: 350px; height: 350px; border-radius: 175px; background: rgba(0, 122, 204, 0.08);">
+                            <div class="layer-label">Vascular Network (HUVEC)</div>
+                        </div>
+                        <div class="tissue-layer" style="left: 100px; top: 50px; width: 400px; height: 400px; border-radius: 200px; background: rgba(206, 145, 120, 0.06);">
+                            <div class="layer-label">Stromal Support (MSC)</div>
+                        </div>
+                        <div class="tissue-layer" style="left: 75px; top: 25px; width: 450px; height: 450px; border-radius: 225px; background: rgba(197, 134, 192, 0.04);">
+                            <div class="layer-label">Immune Barrier Layer</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                        <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-green);">
+                            <div style="font-size: 11px; color: var(--text-secondary);">Total Volume</div>
+                            <div style="font-size: 16px; margin-top: 4px;">2.8 mm³</div>
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-blue);">
+                            <div style="font-size: 11px; color: var(--text-secondary);">Cell Count</div>
+                            <div style="font-size: 16px; margin-top: 4px;">1.2M cells</div>
+                        </div>
+                        <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-yellow);">
+                            <div style="font-size: 11px; color: var(--text-secondary);">IEQ Equivalent</div>
+                            <div style="font-size: 16px; margin-top: 4px;">850 IEQ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Console Panel -->
+            <div class="console-panel">
+                <div class="console-tabs">
+                    <div class="console-tab active" onclick="switchConsoleTab('output')">OUTPUT</div>
+                    <div class="console-tab" onclick="switchConsoleTab('build')">BUILD</div>
+                    <div class="console-tab" onclick="switchConsoleTab('simulation')">SIMULATION</div>
+                    <div class="console-tab" onclick="switchConsoleTab('problems')">PROBLEMS (2)</div>
+                </div>
+                <div class="console-output" id="console-output">
+                    <div class="console-line">
+                        <span class="console-time">[14:23:18]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Fabless-Bio Studio v3.2.0 initialized</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:18]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Loading project: fully_formed_pancreas</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:19]</span>
+                        <span class="console-level success">[SUCCESS]</span>
+                        <span class="console-message">Cell source validation complete - 3 sources verified</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:19]</span>
+                        <span class="console-level success">[SUCCESS]</span>
+                        <span class="console-message">Bio-PDK loaded: lonza_28nm_process.pdk</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:20]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Parsing biological constraints from biological.bcf</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:20]</span>
+                        <span class="console-level success">[SUCCESS]</span>
+                        <span class="console-message">Constraint engine initialized - 12 constraints active</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:21]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Running geometry synthesis...</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:23]</span>
+                        <span class="console-level warning">[WARNING]</span>
+                        <span class="console-message">Layer spacing violation detected at core/vascular interface (18μm &lt; 25μm min)</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:23]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Multi-physics simulation engine ready (diffusion + mechanics + cytokines)</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:24]</span>
+                        <span class="console-level success">[SUCCESS]</span>
+                        <span class="console-message">Biological timing closure achieved (maturation skew &lt; 11h)</span>
+                    </div>
+                    <div class="console-line">
+                        <span class="console-time">[14:23:24]</span>
+                        <span class="console-level info">[INFO]</span>
+                        <span class="console-message">Design ready for verification suite</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="sidebar-right">
+            <div class="sidebar-right-header">
+                DESIGN PROPERTIES
+            </div>
+            <div class="sidebar-right-content">
+                <div class="property-group">
+                    <div class="property-group-title">GEOMETRY</div>
+                    <div class="property-row">
+                        <span class="property-label">Shape:</span>
+                        <span class="property-value">Spheroid</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Diameter:</span>
+                        <span class="property-value">2.4 mm</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Volume:</span>
+                        <span class="property-value">2.8 mm³</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Layers:</span>
+                        <span class="property-value">4 (concentric)</span>
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-group-title">BIOLOGICAL CONSTRAINTS</div>
+                    <div class="property-row">
+                        <span class="property-label">Max core hypoxia:</span>
+                        <span class="property-value" style="color: var(--status-ok);">18 mmHg ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Vascular spacing:</span>
+                        <span class="property-value" style="color: var(--status-ok);">45 μm ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Target GSIS:</span>
+                        <span class="property-value" style="color: var(--status-ok);">&gt; 3.0 ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Immune visibility:</span>
+                        <span class="property-value" style="color: var(--status-ok);">&lt; 0.4 ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Culture time:</span>
+                        <span class="property-value">28 days</span>
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-group-title">TISSUE STRUCTURE (Multi-Scale)</div>
+                    <div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+                        Layer 1 (Core, 800μm):
+                    </div>
+                    <div style="margin-left: 8px; font-size: 10px; line-height: 1.6; margin-bottom: 8px;">
+                        <div>├─ Cells: 65% β, 25% α, 10% δ</div>
+                        <div>├─ ECM: Col-IV, laminin, fibronectin</div>
+                        <div>├─ Vasc: 87% @ 100μm</div>
+                        <div>└─ Maturation: Day 28, GSIS 3.8</div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+                        Layer 2 (Vascular, 150μm):
+                    </div>
+                    <div style="margin-left: 8px; font-size: 10px; line-height: 1.6; margin-bottom: 8px;">
+                        <div>├─ Cells: 80% HUVEC, 20% pericytes</div>
+                        <div>├─ Network density: 45μm spacing</div>
+                        <div>└─ Integration: Day 7-9</div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+                        Total Composition:
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">β-cells (core):</span>
+                        <span class="property-value">850K (70%)</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Endothelial:</span>
+                        <span class="property-value">240K (20%)</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Stromal:</span>
+                        <span class="property-value">110K (10%)</span>
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-group-title">MANUFACTURING & Bio-PDK</div>
+                    <div class="property-row">
+                        <span class="property-label">Foundry:</span>
+                        <span class="property-value">NovaTissue Bio-PDK v2.3</span>
+                    </div>
+                    <div style="font-size: 9px; color: var(--text-secondary); margin-left: 8px; margin-top: 4px; margin-bottom: 8px; line-height: 1.4;">
+                        Bioprinting | 10-500μm nozzles | 8 bioinks<br>200×200×100mm volume | ±15μm precision
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Batch size:</span>
+                        <span class="property-value">50 units</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Est. yield:</span>
+                        <span class="property-value" style="color: var(--status-ok);">87% ±4%</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Cost/unit:</span>
+                        <span class="property-value">$2,840</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Lead time:</span>
+                        <span class="property-value">32 days</span>
+                    </div>
+                </div>
+
+                <div class="property-group">
+                    <div class="property-group-title">VERIFICATION STATUS</div>
+                    <div class="property-row">
+                        <span class="property-label">DRC:</span>
+                        <span class="property-value" style="color: var(--status-warn);">2 violations ⚠</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">LVS:</span>
+                        <span class="property-value" style="color: var(--status-ok);">PASS ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Timing closure:</span>
+                        <span class="property-value" style="color: var(--status-ok);">PASS ✓</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Functional tests:</span>
+                        <span class="property-value" style="color: var(--status-ok);">5/5 PASS ✓</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-top: 12px;" onclick="openModal('compile')">
+                    Compile to Bio-DL
+                </button>
+                <button class="btn btn-success" style="width: 100%; margin-top: 8px;" onclick="openModal('export')">
+                    Export to Foundry
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item">
+            <div class="status-indicator"></div>
+            <span>Ready</span>
+        </div>
+        <div class="status-item">
+            <span>Project: fully_formed_pancreas.biodl</span>
+        </div>
+        <div class="status-item">
+            <span>Foundry: NovaTissue Bio-PDK v2.3</span>
+        </div>
+        <div class="status-item">
+            <div class="status-indicator warning"></div>
+            <span>2 DRC warnings</span>
+        </div>
+        <div class="status-item" style="margin-left: auto;">
+            <span>Cells: 1.2M | Yield: 87% | Build: OK</span>
+        </div>
+    </div>
+
+    <!-- Contribute Bar -->
+    <div class="contribute-bar">
+        <span>📄 Demonstration interface accompanying the manuscript 'Fabless Biofabrication: The Rise of Tissue Foundries' (DOI: xxx, forthcoming). Contact the corresponding author for inquiries.</span>
+    </div>
+
+    <!-- Modals -->
+    <!-- Compile Modal -->
+    <div class="modal-overlay" id="modal-compile">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Compile to Bio-DL</div>
+                <div class="modal-close" onclick="closeModal('compile')">×</div>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 12px; line-height: 1.8; margin-bottom: 20px;">
+                    <strong>Compilation Options:</strong>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" checked>
+                        <span>Optimize for foundry process windows</span>
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" checked>
+                        <span>Generate protocol compilation with timing adjustments</span>
+                    </label>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox">
+                        <span>Include digital twin runtime hooks</span>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" checked>
+                        <span>Run variability Monte Carlo (1000 iterations)</span>
+                    </label>
+                </div>
+                
+                <div style="background: var(--bg-tertiary); padding: 12px; margin-top: 20px; border-left: 3px solid var(--accent-blue);">
+                    <div style="font-size: 11px; color: var(--text-secondary);">Output Format:</div>
+                    <select style="width: 100%; padding: 8px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-primary); margin-top: 8px;">
+                        <option>Bio-DL v3.2 (Recommended)</option>
+                        <option>Bio-DL v3.1 (Legacy)</option>
+                        <option>GDS-II Biological Equivalent</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('compile')">Cancel</button>
+                    <button class="btn btn-primary" onclick="addConsoleLog('success', 'Bio-DL compilation started...'); closeModal('compile');">
+                        Start Compilation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="modal-export">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Export to Bio-DL & Foundry Selection</div>
+                <div class="modal-close" onclick="closeModal('export')">×</div>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 12px; line-height: 1.8; margin-bottom: 20px;">
+                    <strong>Biological Design Language (Bio-DL) Package:</strong>
+                </div>
+                
+                <div style="background: var(--bg-tertiary); padding: 16px; margin-bottom: 16px;">
+                    <div style="font-size: 11px; color: var(--status-ok); margin-bottom: 8px;">✓ All verification checks passed</div>
+                    <div style="font-size: 11px;">
+                        <div>• Design Rule Check (DRC): <span style="color: var(--status-warn);">2 warnings (waived)</span></div>
+                        <div>• Layout vs Schematic (LVS): <span style="color: var(--status-ok);">PASS</span></div>
+                        <div>• Biological Timing Closure: <span style="color: var(--status-ok);">PASS</span></div>
+                        <div>• Functional Verification: <span style="color: var(--status-ok);">PASS (5/5)</span></div>
+                        <div>• Yield Analysis: <span style="color: var(--status-ok);">87% ±4%</span></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-size: 12px; font-weight: bold;">Target Foundry (with Bio-PDK compatibility):</label>
+                    <select style="width: 100%; padding: 8px; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-primary); font-size: 12px;">
+                        <option>Universal Bio-DL (Compatible with all foundries)</option>
+                        <option>Foundry A - Bioprinting (Bio-PDK v2.3) ✓</option>
+                        <option>Foundry B - Scaffold-free (Bio-PDK v1.8) ✓</option>
+                        <option>Foundry C - Decell. Matrix (Bio-PDK v2.1) ✓</option>
+                    </select>
+                    <div style="margin-top: 8px; padding: 12px; background: #F0F8FF; border-left: 3px solid var(--accent-blue); font-size: 10px;">
+                        <strong>Bio-PDK Info:</strong> Foundry A supports extrusion bioprinting (10-500μm nozzles), 8 bioink types, 200×200×100mm build volume, ±15μm precision
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-size: 12px;">Bio-DL Package Contents:</label>
+                    <div style="background: var(--bg-panel); padding: 12px; border: 1px solid var(--border);">
+                        <div style="font-size: 11px; line-height: 1.8;">
+                            ✓ Bio-DL file (XML v2.1, 2.4 MB compressed)<br>
+                            ✓ Cell source specifications & protocols<br>
+                            ✓ Bioreactor maturation schedules<br>
+                            ✓ Quality control checkpoints<br>
+                            ✓ Functional validation test suites<br>
+                            ✓ Digital twin configuration<br>
+                            ✓ RSA-2048 encryption & digital signature
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; font-size: 11px; gap: 8px;">
+                        <input type="checkbox" checked>
+                        <span>Include IP protection (encryption)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; font-size: 11px; gap: 8px; margin-top: 8px;">
+                        <input type="checkbox" checked>
+                        <span>Digital signature for authenticity</span>
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('export')">Cancel</button>
+                    <button class="btn btn-primary" onclick="addConsoleLog('info', 'Previewing Bio-DL XML structure...')">
+                        Preview Bio-DL
+                    </button>
+                    <button class="btn btn-success" onclick="addConsoleLog('success', 'Bio-DL package generated: fully_formed_pancreas_v1.2.biodl (2.4MB)'); closeModal('export');">
+                        Export Bio-DL Package
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yield Analysis Modal -->
+    <div class="modal-overlay" id="modal-yield">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">Biological Yield Analysis</div>
+                <div class="modal-close" onclick="closeModal('yield')">×</div>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 12px; margin-bottom: 20px;">
+                    <strong>Statistical Corner Models - Monte Carlo Results (1000 iterations)</strong>
+                </div>
+                
+                <div class="yield-stat good">
+                    <div>
+                        <div style="font-weight: bold;">NOMINAL (Expected)</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Standard culture conditions, median performance
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; color: var(--status-ok);">87%</div>
+                        <div style="font-size: 10px; color: var(--text-secondary);">±4% yield</div>
+                    </div>
+                </div>
+
+                <div class="yield-stat good">
+                    <div>
+                        <div style="font-weight: bold;">FAST_GROWTH</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Aggressive proliferation, early differentiation
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; color: var(--status-ok);">92%</div>
+                        <div style="font-size: 10px; color: var(--text-secondary);">±3% yield</div>
+                    </div>
+                </div>
+
+                <div class="yield-stat moderate">
+                    <div>
+                        <div style="font-weight: bold;">SLOW_DIFF</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Dense ECM formation, delayed maturation
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; color: var(--status-warn);">78%</div>
+                        <div style="font-size: 10px; color: var(--text-secondary);">±6% yield</div>
+                    </div>
+                </div>
+
+                <div class="yield-stat moderate">
+                    <div>
+                        <div style="font-weight: bold;">LOW_VIABILITY</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Post-cryo stress, reduced cell survival
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; color: var(--status-warn);">71%</div>
+                        <div style="font-size: 10px; color: var(--text-secondary);">±8% yield</div>
+                    </div>
+                </div>
+
+                <div class="yield-stat poor">
+                    <div>
+                        <div style="font-weight: bold;">HIGH_INFLAMMATORY</div>
+                        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                            Cytokine spike scenario, immune activation
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; color: var(--status-error);">62%</div>
+                        <div style="font-size: 10px; color: var(--text-secondary);">±11% yield</div>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-tertiary); padding: 16px; margin-top: 20px; border-left: 3px solid var(--accent-blue);">
+                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 8px;">Overall Yield Projection:</div>
+                    <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                        • Best case: 96% (perfect conditions)<br>
+                        • Typical case: 87% (standard manufacturing)<br>
+                        • Worst case: 58% (multiple failure modes)<br>
+                        • Confidence interval: 95% of batches between 79-91%
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('yield')">Close</button>
+                    <button class="btn btn-primary" onclick="addConsoleLog('info', 'Exporting yield analysis report...'); closeModal('yield');">
+                        Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeMode = 'specify';
+        let activeSidebarTab = 'project';
+        let activeConsoleTab = 'output';
+
+        function hideWelcome() {
+            document.getElementById('welcome-overlay').classList.add('hidden');
+            addConsoleLog('info', 'Welcome to Fabless-Bio Studio - Biological Design Automation Platform');
+        }
+
+        function showFeedback() {
+            document.getElementById('feedback-overlay').classList.add('active');
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback-overlay').classList.remove('active');
+        }
+
+        // Handle feedback form submission
+        document.getElementById('feedback-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('feedback-name').value;
+            const email = document.getElementById('feedback-email').value;
+            const message = document.getElementById('feedback-message').value;
+            
+            // Create mailto link
+            const subject = encodeURIComponent('Fabless-Bio Studio Feedback');
+            const body = encodeURIComponent(
+                `Name: ${name}\n` +
+                `Email: ${email}\n\n` +
+                `Feedback:\n${message}`
+            );
+            
+            // Open email client
+            window.location.href = `mailto:biofabless.foundry@gmail.com?subject=${subject}&body=${body}`;
+            
+            // Show success message
+            addConsoleLog('success', 'Thank you! Opening your email client...');
+            
+            // Clear form and close
+            this.reset();
+            setTimeout(() => {
+                hideFeedback();
+            }, 1500);
+        });
+
+        function switchMode(mode) {
+            activeMode = mode;
+            
+            // Update toolbar buttons
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tool-btn').classList.add('active');
+            
+            const canvas = document.getElementById('canvas-area');
+            
+            if (mode === 'specify') {
+                canvas.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h3 style="color: var(--accent-blue); margin-bottom: 16px;">
+                            CELL SOURCE MANAGER - ML-Ranked Recommendations
+                        </h3>
+                        
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">
+                            Target: Fully formed pancreatic tissue for Type 1 Diabetes treatment
+                        </div>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 2px solid var(--accent-green); margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="color: var(--accent-green); font-weight: bold; font-size: 14px;">🥇 Rank #1: iPSC Line A</div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Confidence: 94% | Best overall match</div>
+                                </div>
+                                <div style="background: var(--status-ok); color: white; padding: 4px 12px; border-radius: 4px; font-size: 11px;">
+                                    RECOMMENDED
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Expected Yield</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-ok);">78%</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Est. Cost</div>
+                                    <div style="font-size: 14px; font-weight: bold;">$12K</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Timeline</div>
+                                    <div style="font-size: 14px; font-weight: bold;">35 days</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Regulatory</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-ok);">FDA ✓</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="addConsoleLog('success', 'Selected iPSC Line A - Loading differentiation protocols...')">
+                                Select & Configure Protocols
+                            </button>
+                        </div>
+
+                        <div style="background: var(--bg-panel); padding: 20px; border: 1px solid var(--border); margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 14px;">🥈 Rank #2: iPSC Line B</div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Confidence: 89% | EU regulatory advantage</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Expected Yield</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-warn);">71%</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Est. Cost</div>
+                                    <div style="font-size: 14px; font-weight: bold;">$15K</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Timeline</div>
+                                    <div style="font-size: 14px; font-weight: bold;">42 days</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Regulatory</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-ok);">EMA ✓</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-panel); padding: 20px; border: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="font-weight: bold; font-size: 14px;">🥉 Rank #3: Primary Islets (Donor-Derived)</div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Confidence: 72% | Supply limited, high cost</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Expected Yield</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-warn);">65%</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Est. Cost</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--status-error);">$45K</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Timeline</div>
+                                    <div style="font-size: 14px; font-weight: bold;">28 days</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 10px; color: var(--text-secondary);">Regulatory</div>
+                                    <div style="font-size: 14px; font-weight: bold; color: var(--text-secondary);">Variable</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px; padding: 16px; background: #E8F4F8; border-left: 3px solid var(--accent-blue);">
+                            <div style="font-size: 11px; font-weight: bold; margin-bottom: 8px;">AI Recommendation Engine</div>
+                            <div style="font-size: 10px; line-height: 1.6;">
+                                Rankings generated from 2,847 published protocols and 418 clinical trials. ML model trained on differentiation efficiency, cost-effectiveness, regulatory precedent, and downstream biofabrication compatibility.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                addConsoleLog('info', 'Cell Source Manager loaded - ML ranking complete (2847 protocols analyzed)');
+            }
+            else if (mode === 'design') {
+                canvas.innerHTML = `
+                    <div id="design-content">
+                        <h3 style="color: var(--accent-green); margin-bottom: 16px;">
+                            TISSUE ARCHITECTURE DESIGNER
+                        </h3>
+                        
+                        <div class="tissue-viewport">
+                            <div class="tissue-layer" style="left: 150px; top: 100px; width: 300px; height: 300px; border-radius: 150px;">
+                                <div class="layer-label">Core Beta Cell Cluster (β-cells)</div>
+                            </div>
+                            <div class="tissue-layer" style="left: 125px; top: 75px; width: 350px; height: 350px; border-radius: 175px; background: rgba(0, 122, 204, 0.08);">
+                                <div class="layer-label">Vascular Network (HUVEC)</div>
+                            </div>
+                            <div class="tissue-layer" style="left: 100px; top: 50px; width: 400px; height: 400px; border-radius: 200px; background: rgba(206, 145, 120, 0.06);">
+                                <div class="layer-label">Stromal Support (MSC)</div>
+                            </div>
+                            <div class="tissue-layer" style="left: 75px; top: 25px; width: 450px; height: 450px; border-radius: 225px; background: rgba(197, 134, 192, 0.04);">
+                                <div class="layer-label">Immune Barrier Layer</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                            <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-green);">
+                                <div style="font-size: 11px; color: var(--text-secondary);">Total Volume</div>
+                                <div style="font-size: 16px; margin-top: 4px;">2.8 mm³</div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-blue);">
+                                <div style="font-size: 11px; color: var(--text-secondary);">Cell Count</div>
+                                <div style="font-size: 16px; margin-top: 4px;">1.2M cells</div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 12px; border-left: 3px solid var(--accent-yellow);">
+                                <div style="font-size: 11px; color: var(--text-secondary);">IEQ Equivalent</div>
+                                <div style="font-size: 16px; margin-top: 4px;">850 IEQ</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                addConsoleLog('info', 'Switched to Design mode - Tissue architecture editor');
+            }
+            else if (mode === 'constraints') {
+                canvas.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h3 style="color: var(--accent-blue); margin-bottom: 16px;">
+                            BIOLOGICAL CONSTRAINT FILE (BCF) EDITOR
+                        </h3>
+                        
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">
+                            Define constraints that drive the design automation. The system will optimize geometry, cell mix, and protocols to meet these targets.
+                        </p>
+
+                        <div class="constraint-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-green);">max_core_hypoxia</strong>
+                                <span style="color: var(--status-ok);">SATISFIED</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Maximum allowable oxygen tension in core region
+                            </div>
+                            <input type="text" class="property-input" value="20 mmHg" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--text-secondary);">
+                                Current: 18 mmHg ✓
+                            </div>
+                        </div>
+
+                        <div class="constraint-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-green);">min_vascular_spacing</strong>
+                                <span style="color: var(--status-ok);">SATISFIED</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Minimum distance between vascular network branches
+                            </div>
+                            <input type="text" class="property-input" value="50 µm" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--text-secondary);">
+                                Current: 45 µm ✓
+                            </div>
+                        </div>
+
+                        <div class="constraint-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-green);">max_total_culture_time</strong>
+                                <span style="color: var(--status-ok);">SATISFIED</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Maximum allowable time from seeding to maturation
+                            </div>
+                            <input type="text" class="property-input" value="28 days" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--text-secondary);">
+                                Current: 28 days ✓
+                            </div>
+                        </div>
+
+                        <div class="constraint-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-green);">target_gsis</strong>
+                                <span style="color: var(--status-ok);">SATISFIED</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Glucose-stimulated insulin secretion index target
+                            </div>
+                            <input type="text" class="property-input" value="> 3.0" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--text-secondary);">
+                                Current: 3.8 ✓
+                            </div>
+                        </div>
+
+                        <div class="constraint-item warning">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-yellow);">immune_visibility_score</strong>
+                                <span style="color: var(--status-warn);">NEAR LIMIT</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Maximum MHC-I/II expression relative to baseline
+                            </div>
+                            <input type="text" class="property-input" value="< 0.4" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--status-warn);">
+                                Current: 0.38 ⚠ (95% of limit)
+                            </div>
+                        </div>
+
+                        <div class="constraint-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <strong style="color: var(--accent-green);">max_cost_per_unit</strong>
+                                <span style="color: var(--status-ok);">SATISFIED</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
+                                Manufacturing cost ceiling (materials + labor + overhead)
+                            </div>
+                            <input type="text" class="property-input" value="$3500 USD" style="width: 200px;">
+                            <div style="font-size: 10px; margin-top: 6px; color: var(--text-secondary);">
+                                Current: $2,840 ✓
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="addConsoleLog('success', 'Constraints updated - Re-optimizing design...')">
+                            Apply Constraints & Re-optimize
+                        </button>
+                    </div>
+                `;
+                addConsoleLog('info', 'Switched to Constraints mode - BCF editor active');
+            }
+            else if (mode === 'scenarios') {
+                canvas.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h3 style="color: var(--accent-purple); margin-bottom: 16px;">
+                            ⚡ MULTI-PHYSICS SCENARIO MANAGER
+                        </h3>
+                        
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">
+                            Test your design against stress conditions and failure modes. Each scenario runs coupled simulations: diffusion + mechanics + electrophysiology + cytokine dynamics + ECM remodeling.
+                        </p>
+
+                        <div class="scenario-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--accent-green); font-size: 14px;">✓ Normoxia Stress Test</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        Standard oxygen delivery, normal culture conditions
+                                    </div>
+                                </div>
+                                <span style="color: var(--status-ok); font-size: 12px;">PASS</span>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-secondary);">
+                                Viability: 93.2% | GSIS: 3.8 | Culture time: 28d
+                            </div>
+                        </div>
+
+                        <div class="scenario-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--accent-yellow); font-size: 14px;">⚠ Immune Attack Simulation</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        TNF-α and IFN-γ cytokine storm scenario
+                                    </div>
+                                </div>
+                                <span style="color: var(--status-warn); font-size: 12px;">DEGRADED</span>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-secondary);">
+                                Viability: 81% | GSIS: 2.9 | Inflammatory score: 0.42 ⚠
+                            </div>
+                        </div>
+
+                        <div class="scenario-card active">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--accent-blue); font-size: 14px;">▶ Batch Variability Monte Carlo</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        1000 iterations across statistical corner models
+                                    </div>
+                                </div>
+                                <span style="color: var(--accent-blue); font-size: 12px;">RUNNING...</span>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-secondary);">
+                                Progress: 847/1000 | Mean yield: 87% ±4% | ETA: 2 min
+                            </div>
+                        </div>
+
+                        <div class="scenario-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--text-primary); font-size: 14px;">Transport Failure Simulation</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        Vascular occlusion at day 14 post-implant
+                                    </div>
+                                </div>
+                                <span style="color: var(--text-secondary); font-size: 12px;">QUEUED</span>
+                            </div>
+                        </div>
+
+                        <div class="scenario-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--text-primary); font-size: 14px;">Cryo-Recovery Analysis</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        Post-thaw viability and functional recovery
+                                    </div>
+                                </div>
+                                <span style="color: var(--text-secondary); font-size: 12px;">QUEUED</span>
+                            </div>
+                        </div>
+
+                        <div class="scenario-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--text-primary); font-size: 14px;">ECM Fibrosis Drift Risk</strong>
+                                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                        Long-term ECM remodeling and stiffening
+                                    </div>
+                                </div>
+                                <span style="color: var(--text-secondary); font-size: 12px;">QUEUED</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button class="btn btn-primary" onclick="addConsoleLog('info', 'Running full scenario suite...')">
+                                Run All Scenarios
+                            </button>
+                            <button class="btn btn-secondary" onclick="addConsoleLog('info', 'Opening scenario configuration...')">
+                                Configure New Scenario
+                            </button>
+                        </div>
+                    </div>
+                `;
+                addConsoleLog('info', 'Switched to Scenarios mode - Multi-physics simulation manager');
+            }
+            else if (mode === 'simulate') {
+                canvas.innerHTML = `
+                    <div style="padding: 20px;">
+                        <h3 style="color: var(--accent-orange); margin-bottom: 16px;">
+                            IN SILICO TESTING SUITE - Digital Twin
+                        </h3>
+                        
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">
+                            Virtual prototyping before physical biofabrication. Run multi-physics simulations to predict tissue behavior and identify failure modes.
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                            <div style="background: var(--bg-tertiary); padding: 16px; border-left: 3px solid var(--accent-blue);">
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 12px; color: var(--accent-blue);">
+                                    Oxygen Diffusion (FEA)
+                                </div>
+                                <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                                    Finite element analysis of O₂ transport through tissue layers
+                                </div>
+                                <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="addConsoleLog('info', 'Running diffusion simulation (FEA solver, 18,472 elements)...')">
+                                    Run Simulation
+                                </button>
+                            </div>
+
+                            <div style="background: var(--bg-tertiary); padding: 16px; border-left: 3px solid var(--accent-green);">
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 12px; color: var(--accent-green);">
+                                    Mechanical Stress
+                                </div>
+                                <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                                    ECM strain and cell deformation under physiological loads
+                                </div>
+                                <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="addConsoleLog('info', 'Running mechanical simulation (Max stress: 2.3 kPa < 5 kPa limit)...')">
+                                    Run Simulation
+                                </button>
+                            </div>
+
+                            <div style="background: var(--bg-tertiary); padding: 16px; border-left: 3px solid var(--accent-yellow);">
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 12px; color: var(--accent-yellow);">
+                                    Cell Migration & Vascularization
+                                </div>
+                                <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                                    Agent-based model of endothelial migration and network formation
+                                </div>
+                                <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="addConsoleLog('info', 'Running vascularization prediction (Day 7-9 anastomosis window)...')">
+                                    Run Simulation
+                                </button>
+                            </div>
+
+                            <div style="background: var(--bg-tertiary); padding: 16px; border-left: 3px solid var(--accent-purple);">
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 12px; color: var(--accent-purple);">
+                                    Immune Response Modeling
+                                </div>
+                                <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                                    Cytokine dynamics and inflammatory cell infiltration prediction
+                                </div>
+                                <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="addConsoleLog('info', 'Running immune response model (TNF-α, IL-6 dynamics)...')">
+                                    Run Simulation
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 1px solid var(--border);">
+                            <div style="color: var(--accent-blue); font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+                                Last Simulation Results: Oxygen Diffusion (Digital Twin)
+                            </div>
+                            
+                            <div style="height: 300px; background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; position: relative;">
+                                <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 8px; border-radius: 4px; font-size: 9px; color: white;">
+                                    Time: Day 7 post-implant<br>
+                                    Elements: 18,472 | Convergence: 1.2e-6
+                                </div>
+                                <div style="text-align: center; color: var(--text-secondary);">
+                                    <div style="font-size: 48px; margin-bottom: 12px;">◐</div>
+                                    <div>Heat map: Oxygen concentration gradient</div>
+                                    <div style="font-size: 10px; margin-top: 4px;">Core → Periphery (5% → 21% O₂)</div>
+                                    <div style="font-size: 9px; margin-top: 8px; color: var(--status-ok);">✓ Critical zone: < 5% hypoxic volume</div>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                                <div style="background: var(--bg-panel); padding: 12px;">
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Core pO₂</div>
+                                    <div style="font-size: 16px; margin-top: 4px; color: var(--status-ok);">18.2 mmHg ✓</div>
+                                </div>
+                                <div style="background: var(--bg-panel); padding: 12px;">
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Hypoxic volume</div>
+                                    <div style="font-size: 16px; margin-top: 4px; color: var(--status-ok);">3.2% ✓</div>
+                                </div>
+                                <div style="background: var(--bg-panel); padding: 12px;">
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Recommendation</div>
+                                    <div style="font-size: 12px; margin-top: 4px; color: var(--status-ok);">Design optimal ✓</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                addConsoleLog('info', 'In Silico Testing Suite loaded - Digital twin ready for simulation');
+            }
+            else if (mode === 'verify') {
+                canvas.innerHTML = `
+                    <div style="padding: 20px;">
+                        <div style="color: var(--accent-green); font-size: 14px; font-weight: bold; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                            ✓ VERIFICATION & VALIDATION SUITE
+                        </div>
+                        
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px;">
+                            <div style="color: var(--accent-green); font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+                                Design Rule Check (DRC)
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 12px; background: var(--bg-panel);">
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Layer Spacing</div>
+                                    <div style="font-size: 13px; margin-top: 4px;">Min: 25μm required</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--status-warn); font-size: 16px;">⚠</div>
+                                    <div style="font-size: 10px; color: var(--status-warn);">2 violations</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 12px; background: var(--bg-panel);">
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Cell Density</div>
+                                    <div style="font-size: 13px; margin-top: 4px;">Within spec limits</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--status-ok); font-size: 16px;">✓</div>
+                                    <div style="font-size: 10px; color: var(--status-ok);">PASS</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--bg-panel);">
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary);">Vascularization Coverage</div>
+                                    <div style="font-size: 13px; margin-top: 4px;">87% of volume within 100μm</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: var(--status-ok); font-size: 16px;">✓</div>
+                                    <div style="font-size: 10px; color: var(--status-ok);">PASS</div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="addConsoleLog('info', 'Running full DRC analysis...')">
+                                Run Full DRC
+                            </button>
+                        </div>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px;">
+                            <div style="color: var(--accent-blue); font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+                                Layout vs Schematic (LVS)
+                            </div>
+                            
+                            <div style="padding: 12px; background: var(--bg-panel); margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Cell type matching</div>
+                                    <div style="color: var(--status-ok);">✓ 4/4 layers verified</div>
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: var(--bg-panel); margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Connectivity check</div>
+                                    <div style="color: var(--status-ok);">✓ All connections valid</div>
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: var(--bg-panel);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Protocol compatibility</div>
+                                    <div style="color: var(--status-ok);">✓ Matched to foundry specs</div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="addConsoleLog('success', 'LVS check completed - All layers match specification')">
+                                Verify LVS
+                            </button>
+                        </div>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px;">
+                            <div style="color: var(--accent-purple); font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+                                Biological Timing Closure
+                            </div>
+                            
+                            <div style="padding: 12px; background: var(--bg-panel); margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Differentiation synchronization</div>
+                                    <div style="color: var(--status-ok);">✓ Skew &lt; 12h</div>
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: var(--bg-panel); margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Vascular integration timing</div>
+                                    <div style="color: var(--status-ok);">✓ Day 7-9 window met</div>
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: var(--bg-panel);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>Maturation latency</div>
+                                    <div style="color: var(--status-ok);">✓ 28d ±2d acceptable</div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-success" style="margin-top: 16px; width: 100%;" onclick="addConsoleLog('success', 'Biological timing closure achieved (maturation skew < 11h)')">
+                                Run Timing Analysis
+                            </button>
+                        </div>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border: 1px solid var(--border);">
+                            <div style="color: var(--accent-yellow); font-size: 13px; font-weight: bold; margin-bottom: 16px;">
+                                Functional Verification
+                            </div>
+                            
+                            <div style="font-size: 11px; line-height: 1.8; color: var(--text-secondary);">
+                                <div>• GSIS response curve: <span style="color: var(--status-ok);">✓ PASS (index 3.8)</span></div>
+                                <div>• Insulin production rate: <span style="color: var(--status-ok);">✓ PASS (142 μU/IEQ)</span></div>
+                                <div>• Cell viability post-culture: <span style="color: var(--status-ok);">✓ PASS (93.2%)</span></div>
+                                <div>• Differentiation markers: <span style="color: var(--status-ok);">✓ PASS (PDX1+ NKX6.1+ INS+)</span></div>
+                                <div>• ECM integrity: <span style="color: var(--status-ok);">✓ PASS (72% crosslinked)</span></div>
+                            </div>
+
+                            <button class="btn btn-success" style="margin-top: 16px; width: 100%;" onclick="addConsoleLog('success', 'All functional verification tests passed')">
+                                Export Verification Report
+                            </button>
+                        </div>
+                    </div>
+                `;
+                addConsoleLog('info', 'Switched to Verify mode - Design validation suite');
+            }
+        }
+
+        function switchSidebarTab(tab) {
+            activeSidebarTab = tab;
+            document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            addConsoleLog('info', `Viewing ${tab} panel`);
+        }
+
+        function switchConsoleTab(tab) {
+            activeConsoleTab = tab;
+            document.querySelectorAll('.console-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function openModal(modalName) {
+            document.getElementById(`modal-${modalName}`).classList.add('active');
+            addConsoleLog('info', `Opening ${modalName} dialog...`);
+        }
+
+        function closeModal(modalName) {
+            document.getElementById(`modal-${modalName}`).classList.remove('active');
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // ESC key closes modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            }
+        });
+
+        // Simulate console output streaming
+        function addConsoleLog(level, message) {
+            const consoleLine = document.createElement('div');
+            consoleLine.className = 'console-line';
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            
+            consoleLine.innerHTML = `
+                <span class="console-time">[${time}]</span>
+                <span class="console-level ${level}">[${level.toUpperCase()}]</span>
+                <span class="console-message">${message}</span>
+            `;
+            
+            const consoleOutput = document.getElementById('console-output');
+            consoleOutput.appendChild(consoleLine);
+            consoleLine.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Tree item click handlers
+        document.querySelectorAll('.tree-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Add click handlers for canvas tabs
+        document.querySelectorAll('.canvas-tab').forEach((tab, index) => {
+            tab.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tab-close')) {
+                    this.remove();
+                    addConsoleLog('info', 'Closed tab');
+                } else {
+                    document.querySelectorAll('.canvas-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    addConsoleLog('info', `Switched to ${this.textContent.trim()}`);
+                }
+            });
+        });
+
+        // Add functionality to tissue layers
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.tissue-layer')) {
+                const layer = e.target.closest('.tissue-layer');
+                document.querySelectorAll('.tissue-layer').forEach(l => {
+                    l.style.border = '1px solid var(--border)';
+                });
+                layer.style.border = '2px solid var(--accent-blue)';
+                addConsoleLog('info', `Selected ${layer.querySelector('.layer-label').textContent}`);
+            }
+        });
+
+        // Prevent right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Prevent common keyboard shortcuts for viewing source/inspector
+        document.addEventListener('keydown', function(e) {
+            // Prevent F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+Shift+C
+            if (e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+                (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+                (e.ctrlKey && e.shiftKey && e.keyCode === 67) || // Ctrl+Shift+C
+                (e.metaKey && e.altKey && e.keyCode === 73) || // Cmd+Option+I (Mac)
+                (e.metaKey && e.altKey && e.keyCode === 74)) { // Cmd+Option+J (Mac)
+                e.preventDefault();
+                return false;
+            }
+            // Keep ESC for closing modals - don't prevent it
+        });
+
+        // Prevent text selection and copying
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>
